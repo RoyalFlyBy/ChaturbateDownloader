@@ -37,3 +37,13 @@ Nothing much to it, pretty straightforward for now
 ##### Future
 
 I don't plan to maintain this unless something breaks due to chaturbate site updates or if a crucial feature is missing
+
+##### Unsupported
+* Private streams
+* logging in
+
+Why? Unlike the PHDownloader I have no account to test these features with therefore had no way of implementing them
+
+Want them to be implemented? I will need to be able to do some testing, donating money or an account with tokens towards that goal would allow me to implement those cool things.
+
+Simply open up an issue and we will figure it out from there. 
