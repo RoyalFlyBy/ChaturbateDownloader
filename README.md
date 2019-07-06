@@ -38,6 +38,8 @@ Use at own risk.
 
 Nothing much to it, pretty straightforward for now
 
+Some saved streams stutter, for now I have no fix on that other than checking the terminal to make sure all sequences were downloaded. As it stands right now stuttering is rare and when it happens it seems to be a thing limited to some models connection being bad fom what I can notice.
+
 ##### Future
 
 I don't plan to maintain this unless something breaks due to chaturbate site updates or if a crucial feature is missing
