@@ -15,15 +15,19 @@ It downloads streams by the link you supply, no need to log in and no encrypted 
 Imagine the link of stream being: ``https://chaturbate.com/mykinkydope/``
 
 Then the command to download indefinitely (until the stream goes private or stops) would be:
+
 ``chaturbateDownloader.exe --URL=https://chaturbate.com/mykinkydope/``
 
 However just having the username would work too, as long ass you use the username as it is represented in the chaturbate url (eg: spaces are replaced with underscores):
+
 ``chaturbateDownloader.exe --URL=mykinkydope``
 
 The command to download the next 5 minutes of the stream:
+
 ``chaturbateDownloader.exe --timeout=5 --URL=https://chaturbate.com/mykinkydope/``
 
 The command that I like to use adds ``[chaturbate.com]`` before the filename
+
 ``chaturbateDownloader.exe --withsite=true --URL=https://chaturbate.com/mykinkydope/``
 
 ## Disclaimer
