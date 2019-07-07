@@ -40,6 +40,8 @@ Nothing much to it, pretty straightforward for now
 
 Some saved streams stutter, for now I have no fix on that other than checking the terminal to make sure all sequences were downloaded. As it stands right now stuttering is rare and when it happens it seems to be a thing limited to some models connection being bad fom what I can notice.
 
+Converting the saved stream to mp4 (in VLC) seems to shrink the file size by up to 50% (tested on a 3gb file and the result was 1.3gb)
+
 ##### Future
 
 I don't plan to maintain this unless something breaks due to chaturbate site updates or if a crucial feature is missing
