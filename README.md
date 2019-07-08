@@ -10,6 +10,8 @@ A CLI Chaturbate.com downloader that allows you to download streams as they are 
 ##### How does it work?
 It downloads streams by the link you supply, no need to log in and no encrypted cookies because nothing worthy of protecting is in there.
 
+Depends on FFmpeg (static).
+
 ##### Examples
 
 Imagine the link of stream being: ``https://chaturbate.com/mykinkydope/``
@@ -30,6 +32,29 @@ The command that I like to use adds ``[chaturbate.com]`` before the filename
 
 ``chaturbateDownloader.exe --withsite=true --URL=https://chaturbate.com/mykinkydope/``
 
+## Installation
+
+First install FFmpeg, on windows this is a little less straightforward than on linux
+
+#### Windows
+* Download the STATIC windows package that suits your platform (32 or 64 bit) from https://ffmpeg.org/download.html and then unzip this package.
+* When you unzip this package you will find a sub folder called ``bin`` that contains `ffmpeg.exe`
+* Now there are 2 options:
+    * Take note of the file location of ``ffmpeg.exe``, copy it somewhere as you will need it later
+    * Add the contents of the ``bin`` folder to your environment variable called `PATH`
+* Download the repository contents
+* Run the executable that fits your platform (32 bit: `_386`, 64 bit: `_amd64`)
+    * If you added ffmpeg to your environment variables ignore this
+    * `chaturbateDownloader.exe --ffmpeg=C:\path\to\ffmpeg.exe --URL=urlhere`
+    * Because you did not add ffmpeg to your environment variables this program can't find the ffmpeg executable so be sure to ALWAYS add the ffmpeg flag with the right path to the ffmpeg executab;e
+
+#### Linux
+
+Run your OS's version of:
+`sudo apt install ffmpeg`
+
+After that you can run the executable that fits your platform perfectly without the ffmpeg flag
+
 ## Disclaimer
 
 Use at own risk.
@@ -38,9 +63,7 @@ Use at own risk.
 
 Nothing much to it, pretty straightforward for now
 
-Some saved streams stutter, for now I have no fix on that other than checking the terminal to make sure all sequences were downloaded. As it stands right now stuttering is rare and when it happens it seems to be a thing limited to some models connection being bad fom what I can notice.
-
-Converting the saved stream to mp4 (in VLC) seems to shrink the file size by up to 50% (tested on a 3gb file and the result was 1.3gb)
+Unusual stutters are fixed, at the cost of having an external dependency.
 
 ##### Future
 
