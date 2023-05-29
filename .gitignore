@@ -1,0 +1,5 @@
+.env
+ChaturbateDownloader.log
+*.ts
+.idea
+/.idea/
