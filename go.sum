@@ -8,8 +8,8 @@ github.com/BRUHItsABunny/gOkHttp v0.3.0 h1:oWiPIWEj6jdiMz8m7ohvxWr+LhfhkSGpGbRWJ
 github.com/BRUHItsABunny/gOkHttp v0.3.0/go.mod h1:/6pwGsRlAPHuDq36PYO3xB7O5sx77oBSkAh99Kb0Q6o=
 github.com/BRUHItsABunny/gOkHttp-advanced-responses v0.3.0 h1:nb8WDkCMkHEckns3Xbvfdx5qdOPqt1wJTou5qkX6Plo=
 github.com/BRUHItsABunny/gOkHttp-advanced-responses v0.3.0/go.mod h1:EULcVN5TPTE4Ou1PLVbp4/7iJ9Kc2MZDwATQhA3f3yU=
-github.com/BRUHItsABunny/gOkHttp-download v0.3.0 h1:grBiJ6VIjFdoxgkXOI3a1ljmeXT7vOFmJ9k9HMc4yR4=
-github.com/BRUHItsABunny/gOkHttp-download v0.3.0/go.mod h1:MG0IJj0LeQk/jCeCTo+2X0pngI0wfOVbPzOAX/I70Ls=
+github.com/BRUHItsABunny/gOkHttp-download v0.3.1 h1:LTv8MZtbSzv8s6evvQ3/o4LeUM9j5xbRMa0oUtxro9g=
+github.com/BRUHItsABunny/gOkHttp-download v0.3.1/go.mod h1:g4JR3+nxo6kGcgXqp3cLvNjD3JvuEYS0blA3/nxDKb8=
 github.com/BRUHItsABunny/go-ghvu v0.0.3 h1:2iaJO6SVAVAWBoKm61tyS3zz+aF45iF1tK07gLbIhik=
 github.com/BRUHItsABunny/go-ghvu v0.0.3/go.mod h1:ujrF6F82M4kFkb7eAwV10tzp38UW2KYlRlMU5w7yd7w=
 github.com/BRUHItsABunny/stringvarformatter v0.0.1 h1:9cThu7zVhmYJrWwojXC8LsqozfE703ABTjOc+9VG7YA=
@@ -43,8 +43,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
-github.com/yapingcat/gomedia v0.0.0-20230426092936-387031404274 h1:cj4I+bvWX9I+Hg6tnZ7DAiOVxzhyLhdvYVKp+WpM/2c=
-github.com/yapingcat/gomedia v0.0.0-20230426092936-387031404274/go.mod h1:WSZ59bidJOO40JSJmLqlkBJrjZCtjbKKkygEMfzY/kc=
+github.com/yapingcat/gomedia v0.0.0-20230601130610-1ce7ce182788 h1:oLxndiIOO3XLtOl2HEcM3Ezlp4HJbP1ubKXYIWV8Q7E=
+github.com/yapingcat/gomedia v0.0.0-20230601130610-1ce7ce182788/go.mod h1:WSZ59bidJOO40JSJmLqlkBJrjZCtjbKKkygEMfzY/kc=
 go.uber.org/atomic v1.10.0 h1:9qC72Qh0+3MqyJbAn8YU5xVq1frD8bn3JtD2oXtafVQ=
 go.uber.org/atomic v1.10.0/go.mod h1:LUxbIzbOniOlMKjJjyPfpl4v+PKK2cNJn91OQbhoJI0=
 golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 h1:HWj/xjIHfjYU5nVXpTM0s39J9CbLn7Cc5a7IC5rwsMQ=

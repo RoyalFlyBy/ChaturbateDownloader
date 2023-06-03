@@ -47,47 +47,6 @@ func main() {
 		}
 	}
 
-	// UI
-	appData.Stats.PollIP(appData.DownloadClient)
-	go func() {
-		appData.BLog.Debug("Starting the UI thread")
-
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt)
-		ticker := time.Tick(time.Second)
-
-		term := bunterm.DefaultTerminal
-		continueLoop := true
-		for continueLoop {
-			shouldStop := appData.Stats.GraceFulStop.Load()
-			select {
-			case <-c:
-				appData.BLog.Debug("UI Thread: SIGTERM detected")
-				shouldStop = true
-				appData.Stats.Stop()
-				break
-			case <-ticker:
-				if !appData.Cfg.Daemon {
-					// Human-readable means we clear the spam
-					term.ClearTerminal()
-					term.MoveCursor(0, 0)
-				}
-				fmt.Println(appData.Stats.Tick(!appData.Cfg.Daemon))
-				break
-			}
-
-			if shouldStop || appData.Stats.IdleTimeoutExceeded() {
-				continueLoop = false
-				if shouldStop {
-					appData.BLog.Warn("UI Thread graceful stop")
-				}
-				appData.BLog.Warn("Downloaded all files")
-				break
-			}
-		}
-		appData.BLog.Debug("Stopping the UI thread")
-	}()
-
 	appData.BLog.Debug(fmt.Sprintf("MAIN THREAD: Current ModelId: %s", modelId))
 	hlsManifest, err := appData.Client.GetHLSManifest(context.Background(), modelId)
 	if err != nil {
@@ -98,6 +57,7 @@ func main() {
 
 	if hlsManifest.RoomStatus != "public" {
 		appData.BLog.Error(fmt.Sprintf("MAIN Thread: stream status: %s", hlsManifest.RoomStatus))
+		fmt.Println(fmt.Sprintf("Model room is: %s", hlsManifest.RoomStatus))
 		os.Exit(1)
 	}
 
@@ -134,12 +94,53 @@ func main() {
 		defer ctxCancel()
 	}
 
-	err = newTask.Download(ctx)
-	if err != nil {
-		err = fmt.Errorf("newTask.Download: %w", err)
-		appData.BLog.Warn(fmt.Sprintf("MAIN Thread: %s", err.Error()))
-	}
+	go func() {
+		err = newTask.Download(ctx)
+		if err != nil {
+			err = fmt.Errorf("newTask.Download: %w", err)
+			appData.BLog.Warn(fmt.Sprintf("DL Thread: %s", err.Error()))
+		}
 
-	appData.BLog.Debug("MAIN Thread: Waiting for threads to finish")
-	appData.Stats.Stop()
+		appData.BLog.Debug("DL Thread: Waiting for threads to finish")
+		appData.Stats.Stop()
+	}()
+
+	// UI
+	appData.Stats.PollIP(appData.DownloadClient)
+	appData.BLog.Debug("Starting the UI thread")
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	ticker := time.Tick(time.Second)
+
+	term := bunterm.DefaultTerminal
+	continueLoop := true
+	for continueLoop {
+		shouldStop := appData.Stats.GraceFulStop.Load()
+		select {
+		case <-c:
+			appData.BLog.Debug("UI Thread: SIGTERM detected")
+			shouldStop = true
+			appData.Stats.Stop()
+			break
+		case <-ticker:
+			if !appData.Cfg.Daemon {
+				// Human-readable means we clear the spam
+				term.ClearTerminal()
+				term.MoveCursor(0, 0)
+			}
+			fmt.Println(appData.Stats.Tick(!appData.Cfg.Daemon))
+			break
+		}
+
+		if shouldStop || appData.Stats.IdleTimeoutExceeded() {
+			continueLoop = false
+			if shouldStop {
+				appData.BLog.Warn("UI Thread graceful stop")
+			}
+			appData.BLog.Warn("Downloaded all files")
+			break
+		}
+	}
+	appData.BLog.Debug("Stopping the UI thread")
 }
