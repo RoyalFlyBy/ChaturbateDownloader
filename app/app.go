@@ -103,7 +103,7 @@ func (a *App) SetupLogger() error {
 
 func (a *App) SetupHTTPClient() error {
 	var err error
-	a.DownloadClient, err = gokhttp_client.NewHTTPClient(gokhttp_client.NewProxyOption("http://localhost:9000"))
+	a.DownloadClient, err = gokhttp_client.NewHTTPClient()
 	if err != nil {
 		return fmt.Errorf("client.NewHTTPClient: %w", err)
 	}
