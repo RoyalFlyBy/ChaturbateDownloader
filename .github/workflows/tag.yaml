@@ -5,17 +5,25 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
   releases-matrix:
-    name: Release Go Binary
+    name: Release Go Binaries
     runs-on: ubuntu-latest
+    env:
+      GO_VERSION: '1.26.0'
+      GOPRIVATE: github.com/RoyalFlyBy/*
+      GONOSUMDB: github.com/RoyalFlyBy/*
     strategy:
       matrix:
         goos: [ linux, windows, darwin ]
@@ -24,22 +32,73 @@ jobs:
           - goarch: arm64
             goos: windows
     steps:
-      - uses: actions/checkout@v3
-      - name: Set APP_VERSION env
-        run: echo APP_VERSION=$(echo ${GITHUB_REF} | rev | cut -d'/' -f 1 | rev ) >> ${GITHUB_ENV}
-      - name: Set BUILD_TIME env
-        run: echo BUILD_TIME=$(date) >> ${GITHUB_ENV}
-      - name: Set REPO_URL env
-        run: echo REPO_URL=$(echo "github.com/${GITHUB_REPOSITORY}/") >> ${GITHUB_ENV}
-      - name: Environment Printer
-        uses: managedkaos/print-env@v1.0
-      - uses: wangyoucao577/go-release-action@v1.33
+      - uses: actions/checkout@v4
+      - name: Configure private modules
+        run: |
+          git config --global url."https://oauth:${{ secrets.GIT_AUTH }}@github.com/".insteadOf "https://github.com/"
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          goversion: "https://dl.google.com/go/go1.19.3.linux-amd64.tar.gz"
-          binary_name: "chaturbatedownloader"
-          extra_files: README.md
-          pre_command: export GO_PRIVATE=github.com/RoyalFlyBy/* && export GO_NO_SUMDB=github.com/RoyalFlyBy/* && git config --global url."https://oauth:${{secrets.GIT_AUTH}}@github.com/".insteadOf "https://github.com/"
-          ldflags: -X "${{ env.REPO_URL }}app.GitRepo=https://${{ env.REPO_URL }}" -X "${{ env.REPO_URL }}app.AppVersion=${{ env.APP_VERSION }}" -X "${{ env.REPO_URL }}app.BuildTime=${{ env.BUILD_TIME }}" -X ${{ env.REPO_URL }}app.GitCommit=${{ github.sha }} -X ${{ env.REPO_URL }}app.GitRef=${{ github.ref }}
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - name: Cache Go toolchain and modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            /opt/hostedtoolcache/go/${{ env.GO_VERSION }}
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-${{ runner.os }}-${{ env.GO_VERSION }}-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-${{ runner.os }}-${{ env.GO_VERSION }}-
+      - name: Download modules
+        run: go mod download
+      - name: Set env vars
+        run: |
+          echo "APP_VERSION=${GITHUB_REF##*/}" >> ${GITHUB_ENV}
+          echo "REPO_URL=github.com/${GITHUB_REPOSITORY}/" >> ${GITHUB_ENV}
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          EXT=""
+          if [ "$GOOS" = "windows" ]; then
+            EXT=".exe"
+          fi
+          go build \
+            -ldflags '-s -w -X "${{ env.REPO_URL }}app.AppVersion=${{ env.APP_VERSION }}" -X "${{ env.REPO_URL }}app.GitCommit=${{ github.sha }}" -X "${{ env.REPO_URL }}app.GitRef=${{ github.ref }}"' \
+            -o "chaturbatedownloader${EXT}" \
+            ./
+      - name: Package
+        run: |
+          ASSET_NAME="chaturbatedownloader-${{ env.APP_VERSION }}-${{ matrix.goos }}-${{ matrix.goarch }}"
+          mkdir -p "${ASSET_NAME}"
+
+          EXT=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            EXT=".exe"
+          fi
+          mv "chaturbatedownloader${EXT}" "${ASSET_NAME}/"
+
+          # Include extra files
+          cp README.md "${ASSET_NAME}/" 2>/dev/null || true
+
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            zip -r "${ASSET_NAME}.zip" "${ASSET_NAME}"
+            md5sum "${ASSET_NAME}.zip" > "${ASSET_NAME}.zip.md5"
+            echo "ASSET_PATH=${ASSET_NAME}.zip" >> ${GITHUB_ENV}
+            echo "MD5_PATH=${ASSET_NAME}.zip.md5" >> ${GITHUB_ENV}
+          else
+            tar -czf "${ASSET_NAME}.tar.gz" "${ASSET_NAME}"
+            md5sum "${ASSET_NAME}.tar.gz" > "${ASSET_NAME}.tar.gz.md5"
+            echo "ASSET_PATH=${ASSET_NAME}.tar.gz" >> ${GITHUB_ENV}
+            echo "MD5_PATH=${ASSET_NAME}.tar.gz.md5" >> ${GITHUB_ENV}
+          fi
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.ASSET_PATH }}
+            ${{ env.MD5_PATH }}
+          token: ${{ secrets.GITHUB_TOKEN }}
