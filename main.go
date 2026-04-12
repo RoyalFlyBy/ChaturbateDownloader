@@ -4,16 +4,18 @@ import (
 	"ChaturbateDownloader/app"
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/BRUHItsABunny/bunterm"
 	gokhttp_download "github.com/BRUHItsABunny/gOkHttp-download"
 	gokhttp_requests "github.com/BRUHItsABunny/gOkHttp/requests"
 	chaturbate_api "github.com/BRUHItsABunny/go-chaturbate/api"
 	chaturbate_constants "github.com/BRUHItsABunny/go-chaturbate/constants"
-	"os"
-	"os/signal"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func main() {
@@ -71,6 +73,13 @@ func main() {
 	nameVars[app.FMTVars[6]] = ""
 	nameVars[app.FMTVars[7]] = strconv.FormatInt(time.Now().UnixMilli(), 10)
 	fileName := appData.NameFormatter.Format(4, nameVars) // should sanitize
+	if dir := filepath.Dir(fileName); dir != "." {
+		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+			err = fmt.Errorf("os.MkdirAll: %w", err)
+			appData.BLog.Error(fmt.Sprintf("MAIN Thread: %s", err.Error()))
+			os.Exit(1)
+		}
+	}
 	appData.BLog.Debug(fmt.Sprintf("Downloading file: %s", fileName))
 
 	mediaHeaders := chaturbate_api.DefaultHeaders(chaturbate_constants.BaseURL)
@@ -85,6 +94,10 @@ func main() {
 	if err != nil {
 		err = fmt.Errorf("gokhttp_download.NewStreamHLSTask: %w", err)
 		appData.BLog.Warn(fmt.Sprintf("MAIN Thread: %s", err.Error()))
+	}
+	newTask.StreamSelector = &gokhttp_download.HLSStreamSelector{
+		VideoIndex: appData.Cfg.VideoQuality,
+		AudioIndex: appData.Cfg.AudioQuality,
 	}
 
 	var ctxCancel context.CancelFunc

@@ -6,6 +6,9 @@ type Config struct {
 	CutOff  int
 	NameFMT string
 
+	VideoQuality int
+	AudioQuality int
+
 	Daemon  bool
 	Debug   bool
 	Version bool

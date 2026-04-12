@@ -4,16 +4,17 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/BRUHItsABunny/bunnlog"
-	gokhttp_download "github.com/BRUHItsABunny/gOkHttp-download"
-	gokhttp_client "github.com/BRUHItsABunny/gOkHttp/client"
-	chaturbate_client "github.com/BRUHItsABunny/go-chaturbate/client"
-	"github.com/BRUHItsABunny/stringvarformatter"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/BRUHItsABunny/bunnlog"
+	gokhttp_download "github.com/BRUHItsABunny/gOkHttp-download"
+	gokhttp_client "github.com/BRUHItsABunny/gOkHttp/client"
+	chaturbate_client "github.com/BRUHItsABunny/go-chaturbate/client"
+	"github.com/BRUHItsABunny/stringvarformatter"
 )
 
 var FMTVars = []string{
@@ -73,6 +74,9 @@ func (a *App) ParseCfg() {
 	flag.IntVar(&a.Cfg.CutOff, "cutoff", 0, "How many minutes to record for and then exit.")
 	flag.StringVar(&a.Cfg.NameFMT, "namefmt", fmt.Sprintf("[%s] %s at %s-%s", FMTVars[0], FMTVars[1], FMTVars[3], FMTVars[5]), "This can be used to format the final file name using the variables: "+strings.Join(FMTVars, ", "))
 
+	flag.IntVar(&a.Cfg.VideoQuality, "video-quality", 0, "Video quality index (0 = highest quality, sorted by bandwidth descending)")
+	flag.IntVar(&a.Cfg.AudioQuality, "audio-quality", 0, "Audio quality index (0 = first matching audio rendition)")
+
 	flag.BoolVar(&a.Cfg.Debug, "debug", false, "This argument is for how verbose the logger will be")
 	flag.BoolVar(&a.Cfg.Daemon, "daemon", false, "This argument is for how the UI feedback will be, if set to true it will print JSON")
 	flag.BoolVar(&a.Cfg.Version, "version", false, "This argument will print the current version data and exit")
@@ -99,7 +103,7 @@ func (a *App) SetupLogger() error {
 
 func (a *App) SetupHTTPClient() error {
 	var err error
-	a.DownloadClient, err = gokhttp_client.NewHTTPClient()
+	a.DownloadClient, err = gokhttp_client.NewHTTPClient(gokhttp_client.NewProxyOption("http://localhost:9000"))
 	if err != nil {
 		return fmt.Errorf("client.NewHTTPClient: %w", err)
 	}
@@ -111,10 +115,29 @@ func (a *App) SetupClient() (err error) {
 	return err
 }
 
+const versionCacheFile = "version_check.cache"
+
+func checkedVersionToday() bool {
+	data, err := os.ReadFile(versionCacheFile)
+	if err != nil {
+		return false
+	}
+	return strings.TrimSpace(string(data)) == time.Now().Format("2006-01-02")
+}
+
+func markVersionChecked() {
+	_ = os.WriteFile(versionCacheFile, []byte(time.Now().Format("2006-01-02")), 0666)
+}
+
 func (a *App) VersionRoutine() string {
 	result := strings.Builder{}
 	currentPrompt := CurrentCodeBase.PromptCurrentVersion(CurrentVersion)
 	result.WriteString(currentPrompt.Output)
+
+	if checkedVersionToday() {
+		return result.String()
+	}
+
 	latestVersion, err := CurrentCodeBase.GetLatestVersion(context.Background(), nil)
 	if err != nil {
 		if strings.Contains(err.Error(), "repository has no tags") {
@@ -122,8 +145,9 @@ func (a *App) VersionRoutine() string {
 		}
 		panic(fmt.Errorf("CurrentCodeBase.GetLatestVersion: %w", err))
 	}
-	isOutdated, latestPrompt := CurrentCodeBase.PromptLatestVersion(CurrentVersion, latestVersion)
+	markVersionChecked()
 
+	isOutdated, latestPrompt := CurrentCodeBase.PromptLatestVersion(CurrentVersion, latestVersion)
 	if isOutdated {
 		result.WriteString("\n")
 		result.WriteString(latestPrompt.Output)
